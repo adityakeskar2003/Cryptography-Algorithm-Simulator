@@ -1,0 +1,88 @@
+import streamlit as st
+from Deffie_Hellman import Deffie_Hellman_Algorithm
+from display import display_cryptographic_result
+
+
+def GUI():
+    st.write(" ")
+    st.write("### Diffie-Hellman Key Exchange")
+    st.write("Diffie-Hellman key exchange is a method of securely exchanging cryptographic keys over a public channel, allowing two parties to agree on a shared secret key without transmitting it directly.")
+    st.write("It uses modular arithmetic and relies on the difficulty of computing discrete logarithms in a finite field to ensure the secrecy of the exchanged key.")
+    st.write("It was published in paper 'New Direction In Cryptography' in IEEE-IT in 1976")
+    st.write(" ")
+    st.write("We generate two parameter p and g.")
+    st.write("p is large prime number")
+    st.write("g is generator of Zp*")
+    # Step 1: Generate Diffie-Hellman parameters (p and g)
+    if st.button('Generate Diffie-Hellman Parameters'):
+        p, g = Deffie_Hellman_Algorithm.generate_dh_parameters()
+        st.session_state.p = p
+        st.session_state.g = g
+
+    if 'p' in st.session_state and 'g' in st.session_state:
+        st.write("Generated Prime (p):")
+        display_cryptographic_result(st.session_state.p)
+        st.write("Generated Primitive Root (g):")
+        display_cryptographic_result(st.session_state.g)
+
+        # Step 2: Generate key pairs for Alice and Bob
+        st.write("Alice chooses 'a' where a : 0 < a < p-1 which is secret to Alice")
+        st.write("Bob chooses 'b' where b: 0 < b < p-1 which is secret to Bob")
+        st.write("Alice generates A by A = g^a mod p where g^a = g*g*g .. a times ")
+        st.write("Bob generates B by B = g^b mod p where g^b = g*g*g .. b times ")
+        if st.button('Generate Key Pairs'):
+            st.session_state.a, st.session_state.A = Deffie_Hellman_Algorithm.generate_dh_keypair(st.session_state.p, st.session_state.g)
+            st.session_state.b, st.session_state.B = Deffie_Hellman_Algorithm.generate_dh_keypair(st.session_state.p, st.session_state.g)
+
+        if 'A' in st.session_state and 'B' in st.session_state:
+            st.write("Alice's Private Key (a):")
+            display_cryptographic_result(st.session_state.a)
+            st.write("Alice's Public Key (A):")
+            display_cryptographic_result(st.session_state.A)
+
+            st.write("Bob's Private Key (b):")
+            display_cryptographic_result(st.session_state.b)
+            st.write("Bob's Public Key (B):")
+            display_cryptographic_result(st.session_state.B)
+
+            st.write("Alice Sends A to Bob")
+            st.write("Bob sends B to Alice")
+            st.write("Alice then computes B^(a) mod p")
+            st.write("Bob then computes A^(b) mod p")
+            # Step 3: Compute shared secret
+            if st.button('Compute Shared Secret'):
+                st.session_state.S_alice = Deffie_Hellman_Algorithm.generate_dh_shared_secret(st.session_state.p, st.session_state.B, st.session_state.a)
+                st.session_state.S_bob = Deffie_Hellman_Algorithm.generate_dh_shared_secret(st.session_state.p, st.session_state.A, st.session_state.b)
+
+            if 'S_alice' in st.session_state and 'S_bob' in st.session_state:
+                st.write("When Alice computes B^(a) it computes g^(a*b) mod p")
+                st.write("When Bob computes A^(b) it computes g^(a*b) mod p")
+                st.write(" ")
+                st.write("Shared Secret computed by Alice:")
+                display_cryptographic_result(st.session_state.S_alice)
+                st.write("Shared Secret computed by Bob:")
+                display_cryptographic_result(st.session_state.S_bob)
+                if st.session_state.S_alice == st.session_state.S_bob:
+                    st.write("Shared secrets match!")
+                else:
+                    st.write("Shared secrets do not match. There is an error.")
+
+    st.markdown("""
+    <hr><hr>
+    """, unsafe_allow_html=True)
+    st.header("Glossary")
+    st.subheader("Group: ")
+    st.write("A group is a fundamental mathematical structure that consists of a set of elements along with a following binary operation :")
+    st.write("1. Closure: For any two element a and b in group, their combination a . b where . is operation, must also be an element of group ")
+    st.write("2. Associativity: The operation must be associative, meaning that for all elements a,b,c in the group, the equation (a.b).c = a.(b.c) holds true (. is operation)")
+    st.write("3. Identity Element: There exists an identity element 'e' in the group such that for any element 'a' in the group, (a.e) = (e.a) = a")
+    st.write("4. Inverse Element: For every element a in in the group, there exists an inverse element a^(-1) such that a.a(-1) = a^(-1).a  = e where e is identity element")
+    st.write(" ")
+    st.subheader("Cyclic Group: ")
+    st.write("A cyclic group is a special type of group in algebra where all the elements can be generated by repeatedly applying a single element, often referred to as a generator, through the group's operation.")
+    st.write(" ")
+    st.subheader("Generator: ")
+    st.write("There exists an element g in the group such that every element of group can be expressed as g^(n) where n is integer. This g is generator")
+    st.write(" ")
+    st.subheader("Example: ")
+    st.write("An example is Zn  the group of integers modulo n under Addition where g = 1 is generator")
