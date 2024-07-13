@@ -92,9 +92,7 @@ def GUI():
                 st.write("Decrypted Hash")
                 display_cryptographic_result(st.session_state.decrypted_plaintext)
                 st.write("Decrypted Plaintext: Pm = C2 - S")
-                st.session_state.x = ECC_Algorithm.verify(st.session_state.decrypted_plaintext,
-                                                          st.session_state.message)
-                display_cryptographic_result(st.session_state.x)
+                display_cryptographic_result(st.session_state.message)
 
 
 
